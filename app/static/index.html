@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101e33" />
+  <title>SupportLens — Intelligent Incident Assistant</title>
+  <style>
+    :root { --navy:#111c31; --navy2:#17253e; --blue:#2563eb; --ink:#14233a; --muted:#66758e; --border:#e1e7f0; --bg:#f5f8fc; --white:#fff; --good:#147d65; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.5; }
+    button,input,textarea,select { font:inherit; }
+    button { cursor:pointer; }
+    .layout { min-height:100vh; display:grid; grid-template-columns:250px minmax(0,1fr); }
+    aside { background:var(--navy); color:#ecf2ff; display:flex; flex-direction:column; min-height:100vh; }
+    .brand { display:flex; align-items:center; gap:12px; padding:32px 24px 36px; }
+    .brand-mark { width:40px; height:40px; display:grid; place-items:center; background:#397cff; border-radius:13px; font-size:23px; box-shadow:0 5px 22px #2d5ed050; }
+    .brand-name { font-size:20px; font-weight:750; letter-spacing:-.6px; }
+    .brand-sub { display:block; color:#90a6cc; font-size:10px; letter-spacing:.7px; text-transform:uppercase; }
+    nav { padding:0 12px; display:grid; gap:7px; }
+    .nav-item { width:100%; color:#b5c5df; border:0; background:transparent; text-align:left; padding:12px 16px; border-radius:12px; }
+    .nav-item:hover,.nav-item.active { background:#243956; color:#fff; }
+    .nav-item.active { box-shadow:inset 3px 0 0 #5394ff; }
+    .aside-bottom { margin-top:auto; padding:24px; font-size:12px; color:#91a6c7; }
+    .online { display:inline-block; width:8px; height:8px; background:#36d5a6; border-radius:99px; margin-right:6px; }
+    main { min-width:0; padding:40px clamp(22px,5vw,70px) 70px; max-width:1400px; width:100%; margin:0 auto; }
+    .topbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; margin-bottom:32px; }
+    .eyebrow { font-size:11px; font-weight:750; letter-spacing:1.7px; color:#557baf; text-transform:uppercase; }
+    h1 { font-size:clamp(26px,3vw,35px); line-height:1.18; letter-spacing:-1.15px; margin:8px 0 10px; }
+    p.lead { margin:0; color:var(--muted); max-width:660px; font-size:14px; }
+    .pill { padding:8px 12px; color:#356a52; font-size:12px; background:#e1f6ec; border:1px solid #c5e7d7; border-radius:30px; white-space:nowrap; }
+    .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin:25px 0 28px; }
+    .stat { background:#fff; border:1px solid var(--border); border-radius:16px; padding:20px 22px; }
+    .stat span { color:#677791; display:block; font-size:12px; }
+    .stat strong { font-size:27px; font-weight:750; letter-spacing:-1px; }
+    .panel { border:1px solid var(--border); border-radius:19px; background:#fff; box-shadow:0 7px 25px #1d325007; overflow:hidden; }
+    .panel-head { padding:24px 27px 17px; border-bottom:1px solid #ecf0f6; }
+    .panel-head h2 { font-size:18px; margin:0 0 3px; letter-spacing:-.4px; }
+    .panel-head p { margin:0; font-size:12px; color:var(--muted); }
+    .ask-zone { padding:23px 27px 25px; }
+    textarea,input,select { width:100%; border:1px solid #d8e0ec; border-radius:11px; color:var(--ink); background:white; outline:none; padding:12px 13px; }
+    textarea:focus,input:focus,select:focus { border-color:#80adff; box-shadow:0 0 0 3px #dfeaff; }
+    textarea { min-height:112px; resize:vertical; }
+    .ask-zone textarea { min-height:105px; }
+    .controls { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px; }
+    .controls label { display:flex; align-items:center; font-size:12px; color:#5d6b7e; gap:7px; }
+    .controls input[type=checkbox] { width:16px; height:16px; accent-color:var(--blue); }
+    .controls select { width:auto; padding:8px 10px; }
+    .btn { background:var(--blue); border:0; border-radius:10px; color:#fff; font-weight:700; font-size:13px; padding:12px 19px; }
+    .btn:hover { background:#1c4eca; }
+    .btn:disabled { opacity:.65; cursor:wait; }
+    .btn-secondary { color:#1e4fac; background:#eaf1ff; }
+    .btn-secondary:hover { background:#dce9ff; }
+    .grow { flex:1; }
+    .suggest { display:flex; flex-wrap:wrap; gap:9px; margin-top:19px; }
+    .suggest button { border:1px solid #e1e8f1; background:#f7f9fd; border-radius:18px; padding:7px 11px; color:#58677b; font-size:11px; }
+    .suggest button:hover { color:#155dc6; background:#edf4ff; }
+    .result { margin-top:22px; display:none; }
+    .result.visible { display:block; }
+    .answer-box { border:1px solid #cfe1ff; background:linear-gradient(130deg,#f2f7ff,#ffffff); border-radius:15px; padding:23px; margin-bottom:20px; }
+    .answer-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:12px; }
+    .answer-header strong { color:#1d4b9b; font-size:13px; }
+    .answer-badge { color:#0f6d59; font-size:11px; background:#dff8ee; border-radius:30px; padding:4px 8px; }
+    .answer-text { white-space:pre-wrap; font-size:14px; line-height:1.75; }
+    .notice { margin:12px 0 0; color:#9c6b1b; font-size:12px; }
+    .sources-title { margin:0 0 13px; font-size:15px; }
+    .source { border:1px solid #e2e8f1; background:#fff; border-radius:13px; padding:17px 20px; margin:10px 0; }
+    .source-top { display:flex; align-items:flex-start; gap:10px; justify-content:space-between; }
+    .source h3 { margin:0; font-size:14px; }
+    .source small { display:block; margin-top:4px; color:#77859c; }
+    .source p { font-size:12px; margin:12px 0 0; color:#4f5e73; }
+    .score { white-space:nowrap; color:#145c9b; font-size:11px; background:#edf5ff; padding:4px 8px; border-radius:7px; }
+    .resolution { background:#f2faf6; border-radius:9px; padding:10px 12px; color:#306d56!important; }
+    .field { display:grid; gap:7px; }
+    .field label { font-size:12px; color:#485e78; font-weight:650; }
+    .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:17px; }
+    .form-body { padding:26px; display:grid; gap:18px; }
+    .list-body { padding:20px 27px 28px; }
+    .incident-row { border-bottom:1px solid #eef1f6; padding:16px 0; }
+    .incident-row:last-child { border:0; }
+    .incident-row strong { display:block; font-size:14px; }
+    .incident-row span { color:#7b8aa1; font-size:12px; }
+    .feedback { margin:10px 0; font-size:12px; }
+    .feedback.error { color:#c03232; }
+    .feedback.success { color:#13815c; }
+    .hidden { display:none; }
+    @media(max-width:800px) {
+      .layout { grid-template-columns:1fr; }
+      aside { min-height:0; }
+      .brand { padding:15px 20px 10px; }
+      nav { display:flex; padding:0 10px 12px; }
+      .nav-item { text-align:center; padding:9px; font-size:12px; }
+      .aside-bottom { display:none; }
+      main { padding:26px 16px 50px; }
+      .stats { gap:8px; }
+      .stat { padding:14px; }
+      .stat strong { font-size:24px; }
+      .panel-head,.ask-zone,.list-body,.form-body { padding:19px; }
+      .field-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand"><div class="brand-mark">◈</div><div><div class="brand-name">SupportLens</div><span class="brand-sub">Incident Intelligence</span></div></div>
+    <nav aria-label="Navigation">
+      <button class="nav-item active" data-tab="assistant">✦ &nbsp; Assistant IA</button>
+      <button class="nav-item" data-tab="incidents">▤ &nbsp; Incidents</button>
+      <button class="nav-item" data-tab="new">＋ &nbsp; Nouvel incident</button>
+    </nav>
+    <div class="aside-bottom"><span class="online"></span> API SupportLens<br><br> NLP · pgvector · RAG<br>Projet de démonstration</div>
+  </aside>
+  <main>
+    <header class="topbar">
+      <div><div class="eyebrow">GESTION INTELLIGENTE DU SUPPORT</div><h1 id="page-title">Assistant d'incidents</h1><p class="lead" id="page-lead">Retrouvez les solutions pertinentes à partir des incidents passés, en langage naturel.</p></div>
+      <div class="pill">● &nbsp; Version MVP</div>
+    </header>
+
+    <div class="stats" aria-label="Statistiques d'incidents">
+      <div class="stat"><span>Incidents enregistrés</span><strong id="total">—</strong></div>
+      <div class="stat"><span>Incidents résolus</span><strong id="resolved">—</strong></div>
+      <div class="stat"><span>En cours / ouverts</span><strong id="open">—</strong></div>
+    </div>
+
+    <section id="tab-assistant">
+      <div class="panel">
+        <div class="panel-head"><h2>Posez votre question</h2><p>La recherche identifie les incidents proches et le LLM peut produire une réponse fondée sur leurs résolutions.</p></div>
+        <div class="ask-zone">
+          <form id="ask-form">
+            <label class="field" for="question"><span style="font-size:12px;font-weight:650;color:#495d76;margin-bottom:5px">Votre question</span></label>
+            <textarea id="question" required minlength="4" maxlength="1200" placeholder="Ex. Pourquoi mon API renvoie-t-elle une erreur 401 ?"></textarea>
+            <div class="controls">
+              <label><input id="generate" type="checkbox" checked /> Générer une réponse RAG (Ollama)</label>
+              <label>Résultats <select id="top-k"><option value="3">3</option><option value="5">5</option><option value="8">8</option></select></label>
+              <span class="grow"></span>
+              <button class="btn" id="ask-btn" type="submit">Rechercher →</button>
+            </div>
+          </form>
+          <div class="suggest"><button type="button" data-question="Pourquoi une erreur 401 apparaît après une période d'inactivité ?">Erreur 401</button><button type="button" data-question="Comment résoudre un timeout PostgreSQL sous forte charge ?">Timeout PostgreSQL</button><button type="button" data-question="Que faire lorsqu'un conteneur Docker redémarre en boucle ?">Docker redémarre</button></div>
+          <div class="feedback" id="ask-feedback" role="status"></div>
+          <div class="result" id="result" aria-live="polite">
+            <div class="answer-box"><div class="answer-header"><strong>✦ Réponse SupportLens</strong><span id="answer-badge" class="answer-badge"></span></div><div id="answer" class="answer-text"></div><div id="notice" class="notice"></div></div>
+            <h3 class="sources-title">Incidents retrouvés <span id="source-count"></span></h3>
+            <div id="sources"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-incidents" class="hidden">
+      <div class="panel"><div class="panel-head"><h2>Base d'incidents</h2><p>Historique des tickets enregistrés, avec leurs symptômes et résolutions.</p></div><div class="list-body" id="incident-list">Chargement…</div></div>
+    </section>
+
+    <section id="tab-new" class="hidden">
+      <div class="panel"><div class="panel-head"><h2>Enregistrer un incident</h2><p>Chaque ticket est converti en vecteur pour être retrouvable par recherche sémantique.</p></div>
+        <form class="form-body" id="incident-form">
+          <div class="field-grid">
+            <div class="field"><label for="ref">Référence (facultative)</label><input id="ref" maxlength="80" placeholder="INC-013" /></div>
+            <div class="field"><label for="category">Catégorie</label><input id="category" maxlength="80" placeholder="Authentification" value="Autre" /></div>
+          </div>
+          <div class="field"><label for="title">Titre de l'incident *</label><input id="title" required minlength="5" maxlength="220" placeholder="Erreur de connexion après une mise à jour" /></div>
+          <div class="field"><label for="description">Description des symptômes *</label><textarea id="description" required minlength="10" maxlength="5000" placeholder="Décrivez le problème, le contexte et les messages d'erreur..."></textarea></div>
+          <div class="field"><label for="resolution">Résolution (si connue)</label><textarea id="resolution" maxlength="5000" placeholder="Expliquez comment le problème a été résolu..."></textarea></div>
+          <div class="field-grid"><div class="field"><label for="priority">Priorité</label><select id="priority"><option>faible</option><option selected>moyenne</option><option>haute</option><option>critique</option></select></div><div class="field"><label for="status">Statut</label><select id="status"><option>ouvert</option><option>en cours</option><option selected>résolu</option></select></div></div>
+          <div><button class="btn" id="save-btn" type="submit">Enregistrer l'incident</button><p class="feedback" id="save-feedback" role="status"></p></div>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+  const $ = id => document.getElementById(id);
+  const titles = {assistant:["Assistant d'incidents","Interrogez votre base de connaissances en langage naturel."], incidents:["Base d'incidents","Consultez les tickets enregistrés et leurs solutions."], new:["Nouvel incident","Enrichissez les connaissances de SupportLens."]};
+  function setTab(tab) {
+    for (const t of Object.keys(titles)) $("tab-"+t).classList.toggle("hidden",t!==tab);
+    document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+    $("page-title").textContent=titles[tab][0]; $("page-lead").textContent=titles[tab][1];
+    if (tab==="incidents") loadIncidents();
+  }
+  document.querySelectorAll(".nav-item").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+  async function api(path, options) {
+    const response = await fetch(path, options);
+    let data;
+    try { data=await response.json(); } catch { throw new Error("Réponse API invalide"); }
+    if (!response.ok) throw new Error(typeof data.detail==="string"?data.detail:"Erreur HTTP "+response.status);
+    return data;
+  }
+  async function loadStats() {
+    try { const data=await api("/api/stats"); for (const key of ["total","resolved","open"]) $(key).textContent=data[key]; }
+    catch { for (const key of ["total","resolved","open"]) $(key).textContent="?"; }
+  }
+  function elt(tag,cls,text) { const n=document.createElement(tag); if(cls)n.className=cls; if(text!==undefined)n.textContent=text; return n; }
+  function sourceCard(source) {
+    const outer=elt("article","source"); const top=elt("div","source-top"); const left=elt("div");
+    left.append(elt("h3","",source.title)); left.append(elt("small","",`${source.source_ref||"Incident #"+source.id} · ${source.category} · ${source.status}`));
+    top.append(left,elt("span","score",`${Math.round(source.score*100)} % similarité`));
+    outer.append(top,elt("p","",source.description));
+    if(source.resolution) outer.append(elt("p","resolution","✓ Solution : "+source.resolution));
+    return outer;
+  }
+  async function doAsk(event) {
+    event.preventDefault();
+    const btn=$("ask-btn"); btn.disabled=true; btn.textContent="Recherche en cours…";
+    $("ask-feedback").textContent="Premier lancement : le modèle d'embeddings peut être téléchargé et chargé."; $("ask-feedback").className="feedback";
+    try {
+      const data=await api("/api/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:$("question").value,top_k:Number($("top-k").value),generate:$("generate").checked})});
+      $("result").classList.add("visible"); $("answer").textContent=data.answer;
+      $("notice").textContent=data.notice||""; $("answer-badge").textContent=data.generated?"Réponse générée":"Recherche uniquement";
+      $("source-count").textContent=`(${data.sources.length})`; $("sources").replaceChildren(...data.sources.map(sourceCard));
+      $("ask-feedback").textContent="";
+    } catch(error) { $("ask-feedback").textContent=error.message; $("ask-feedback").className="feedback error"; }
+    finally { btn.disabled=false; btn.textContent="Rechercher →"; }
+  }
+  $("ask-form").addEventListener("submit",doAsk);
+  document.querySelectorAll("[data-question]").forEach(b=>b.addEventListener("click",()=>{$("question").value=b.dataset.question;setTab("assistant");$("ask-form").requestSubmit();}));
+  async function loadIncidents() {
+    const list=$("incident-list"); list.textContent="Chargement…";
+    try {
+      const incidents=await api("/api/incidents?limit=100"); list.replaceChildren();
+      if (!incidents.length) { list.textContent="Aucun incident. Chargez les exemples avec scripts/seed.py ou ajoutez un incident."; return; }
+      for(const inc of incidents){ const row=elt("div","incident-row"); row.append(elt("strong","",inc.title));row.append(elt("span","",`${inc.source_ref||"#"+inc.id} · ${inc.category} · ${inc.priority} · ${inc.status}`));list.append(row); }
+    } catch (error) { list.textContent=error.message; }
+  }
+  $("incident-form").addEventListener("submit",async event=>{
+    event.preventDefault();const btn=$("save-btn");btn.disabled=true;const feedback=$("save-feedback");feedback.textContent="Calcul de l'embedding et sauvegarde…";feedback.className="feedback";
+    const payload={source_ref:$("ref").value.trim()||null,title:$("title").value.trim(),description:$("description").value.trim(),resolution:$("resolution").value.trim()||null,category:$("category").value.trim()||"Autre",priority:$("priority").value,status:$("status").value};
+    try{const saved=await api("/api/incidents",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});feedback.textContent="✓ Incident #"+saved.id+" ajouté. Il est désormais indexé.";feedback.className="feedback success";$("incident-form").reset();loadStats();}
+    catch(error){feedback.textContent=error.message;feedback.className="feedback error";}
+    finally{btn.disabled=false;}
+  });
+  loadStats();
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+[
+  {
+    "source_ref": "INC-001",
+    "title": "Erreur 401 à la connexion après expiration du jeton",
+    "description": "Plusieurs utilisateurs obtiennent une réponse HTTP 401 en ouvrant le tableau de bord après une longue période d'inactivité. Le jeton d'accès a expiré mais le client continue de le réutiliser.",
+    "resolution": "Implémenter le renouvellement du jeton avec le refresh token, supprimer le jeton expiré et rediriger vers l'authentification si le renouvellement échoue.",
+    "category": "Authentification",
+    "priority": "haute",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-002",
+    "title": "Erreur 403 pour les comptes sans le rôle administrateur",
+    "description": "Les utilisateurs standard peuvent se connecter mais l'API de gestion des rapports renvoie 403 Forbidden. Le rôle requis par la route est admin alors que l'accès lecteur devrait être autorisé.",
+    "resolution": "Corriger la règle de contrôle d'accès, autoriser le rôle reader sur la route GET et conserver admin pour les modifications. Ajouter des tests de permissions.",
+    "category": "Autorisations",
+    "priority": "moyenne",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-003",
+    "title": "Timeout de connexion à PostgreSQL sous forte charge",
+    "description": "Lors des pics de trafic, l'API n'arrive plus à obtenir de connexions PostgreSQL et les requêtes dépassent 30 secondes. Le pool SQLAlchemy est saturé.",
+    "resolution": "Analyser les connexions actives et les requêtes lentes, fermer correctement les sessions et ajuster la taille du pool. Ajouter des métriques de temps d'attente.",
+    "category": "Base de données",
+    "priority": "critique",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-004",
+    "title": "API renvoie 502 Bad Gateway derrière Nginx",
+    "description": "Le reverse proxy affiche 502 au moment de l'import de gros fichiers. Le service Python est toujours actif mais met trop de temps à répondre.",
+    "resolution": "Contrôler les logs Nginx et applicatifs, déplacer l'import vers un job asynchrone et définir les limites et timeouts adaptés.",
+    "category": "API",
+    "priority": "haute",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-005",
+    "title": "Notifications par e-mail non envoyées",
+    "description": "Les e-mails de confirmation restent en file d'attente. Le serveur SMTP refuse certaines connexions à cause d'identifiants expirés.",
+    "resolution": "Renouveler les identifiants SMTP, vérifier la configuration TLS, tester l'envoi depuis le service et mettre en place un mécanisme de retry.",
+    "category": "Messagerie",
+    "priority": "moyenne",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-006",
+    "title": "Conteneur Docker redémarre en boucle",
+    "description": "Le service worker entre dans un état CrashLoop après un déploiement. Le journal du conteneur indique une variable d'environnement obligatoire manquante.",
+    "resolution": "Ajouter la variable manquante dans la configuration Docker Compose, vérifier les secrets injectés et relancer le service après validation.",
+    "category": "Infrastructure",
+    "priority": "haute",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-007",
+    "title": "Utilisateurs VPN déconnectés après quinze minutes",
+    "description": "Des collaborateurs perdent leur connexion VPN après une période fixe, principalement en télétravail. Les paramètres de durée de session sont trop restrictifs.",
+    "resolution": "Examiner les logs du concentrateur VPN, aligner les durées de session sur la politique de sécurité et tester le renouvellement automatique des sessions.",
+    "category": "Réseau",
+    "priority": "moyenne",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-008",
+    "title": "Espace disque saturé par les logs applicatifs",
+    "description": "Le serveur Linux atteint 99 pour cent d'utilisation disque. Les fichiers de logs augmentent sans rotation et provoquent des erreurs d'écriture.",
+    "resolution": "Mettre en place logrotate, définir une durée de rétention, purger les journaux obsolètes après vérification et surveiller l'espace disque.",
+    "category": "Infrastructure",
+    "priority": "critique",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-009",
+    "title": "Paiement refusé malgré une carte valide",
+    "description": "Certains paiements reçoivent une erreur de validation de la passerelle. Le format envoyé pour le champ currency est incorrect.",
+    "resolution": "Corriger le format ISO du code devise, ajouter une validation côté API et des tests de non-régression sur les transactions.",
+    "category": "Paiement",
+    "priority": "haute",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-010",
+    "title": "Fuite mémoire sur un service de génération de rapports",
+    "description": "La consommation mémoire du service Python augmente à chaque export CSV et finit par provoquer un redémarrage du conteneur.",
+    "resolution": "Remplacer le chargement complet du dataset par une génération CSV en streaming, profiler la mémoire et ajouter des limites et alertes.",
+    "category": "Performance",
+    "priority": "haute",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-011",
+    "title": "Échec de synchronisation SSO après modification du certificat",
+    "description": "La connexion SSO échoue pour tous les employés après le renouvellement du certificat de signature utilisé par le fournisseur d'identité.",
+    "resolution": "Mettre à jour les métadonnées SAML et le certificat public du fournisseur d'identité, puis tester le flux SSO avec un compte de validation.",
+    "category": "Authentification",
+    "priority": "critique",
+    "status": "résolu"
+  },
+  {
+    "source_ref": "INC-012",
+    "title": "Synchronisation du catalogue bloquée en file d'attente",
+    "description": "Le catalogue produits n'est plus mis à jour depuis deux heures. Les jobs de synchronisation restent au statut pending et les logs montrent une connexion impossible au broker de messages.",
+    "resolution": "Vérifier la disponibilité du broker et les paramètres de connexion du worker. Relancer les jobs échoués avec une politique de retry et une alerte de file d'attente.",
+    "category": "Intégration",
+    "priority": "haute",
+    "status": "résolu"
+  }
+]

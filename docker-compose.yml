@@ -1,0 +1,47 @@
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: supportlens
+      POSTGRES_USER: supportlens
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-supportlens_dev}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U supportlens -d supportlens"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://supportlens:${POSTGRES_PASSWORD:-supportlens_dev}@db:5432/supportlens
+      OLLAMA_URL: http://ollama:11434
+      HF_HOME: /models
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      OLLAMA_TIMEOUT: ${OLLAMA_TIMEOUT:-180}
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - model_cache:/models
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Lancement optionnel : docker compose --profile rag up --build -d
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["rag"]
+    volumes:
+      - ollama_data:/root/.ollama
+    # Pas de port exposé sur la machine : utilisé par l'API en réseau Docker.
+
+volumes:
+  postgres_data:
+  model_cache:
+  ollama_data:
